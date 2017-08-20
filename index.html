@@ -3,6 +3,7 @@
 <head>
 	<title>Interactive 3D</title>
 	<meta charset="utf-8">
+	<link rel="icon" type="image/png" sizes="36x36" href="images/favicon-36x36.png">
 	<style type="text/css">
 		body{
 			font-family: monospace;
@@ -69,36 +70,27 @@
 	<script src="js/ColladaLoader.js"></script>
 	<div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
 	<script>
-		/*
-			Three.js "tutorials by example"
-			Author: Lee Stemkoski
-			Date: July 2013 (three.js v59dev)
-		    Based on http://www.adobe.com/devnet/html5/articles/javascript-motion-detection.html
-		 */
 
-		// MAIN
+	// PRINCIPAL
 
-		// standard global variables
+		// variables globales
 		var container, scene, camera, renderer, controls, stats;
 		var keyboard = new THREEx.KeyboardState();
 		var clock = new THREE.Clock();
-		// custom global variables
 		var cube;
-		var android;
 		var dae;
 		var morph = [];
 
-		var animOffset       = 0,   // starting frame of animation
+		var animOffset       = 0,   //cuadro de inicio de la animacion
 			walking         = false,
-			duration        = 100, // milliseconds to complete animation
-			keyframes       = 20,   // total number of animation frames
-			interpolation   = duration / keyframes, // milliseconds per frame
-			lastKeyframe    = 0,    // previous keyframe
+			duration        = 1000, //milisegundos para terminar la animacion
+			keyframes       = 20,   //total de cuadros por ssegundo de la animacion
+			interpolation   = duration / keyframes, //milisegundos por cuadro
+			lastKeyframe    = 0,    //keyframe previo
 			currentKeyframe = 0;
 			delta=0;
 
-
-		// assign global variables to HTML elements
+		//asignar variables glovales a los elementos HTML
 		var video = document.getElementById( 'monitor' );
 		var videoCanvas = document.getElementById( 'videoCanvas' );
 		var videoContext = videoCanvas.getContext( '2d' );
@@ -118,12 +110,12 @@
 		init();
 		animate();
 
-		// FUNCTIONS 		
+		// FUNCIONES 		
 		function init() 
 		{
-			// SCENE
+			// ESCENA
 			scene = new THREE.Scene();
-			// CAMERA
+			// CAMARA
 			var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
 			var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
 			camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
@@ -131,7 +123,7 @@
 			//camera.position.set(0,150,400); posicion de la camara por default
 			camera.position.set(0,100,700);
 			camera.lookAt(scene.position);	
-			// RENDERER
+			// RENDERERIZAR
 			if ( Detector.webgl )
 				renderer = new THREE.WebGLRenderer( {antialias:true} );
 			else
@@ -139,22 +131,22 @@
 			renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 			container = document.getElementById( 'ThreeJS' );
 			container.appendChild( renderer.domElement );
-			// EVENTS
+			// EVENTOS
 			THREEx.WindowResize(renderer, camera);
 			THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
-			// CONTROLS
+			// CONTROLES
 			controls = new THREE.OrbitControls( camera, renderer.domElement );
-			// STATS
+			// STATUS
 			stats = new Stats();
 			stats.domElement.style.position = 'absolute';
 			stats.domElement.style.bottom = '0px';
 			stats.domElement.style.zIndex = 100;
 			container.appendChild( stats.domElement );
-			// LIGHT
-			var light = new THREE.PointLight(0xffffff);
+			// LUZ
+			var light = new THREE.PointLight(0xffffff,3,0);
 			light.position.set(-100,250,200);
 			scene.add(light);
-			// FLOOR
+			// SUELO
 			var floorTexture = new THREE.ImageUtils.loadTexture( 'images/rock-512.jpg' );
 			floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
 			floorTexture.repeat.set( 10, 10 );
@@ -164,40 +156,14 @@
 			floor.position.y = -100;// -0.5;
 			floor.rotation.x = Math.PI / 2;
 			scene.add(floor);
-			// SKYBOX/FOG
-			//scene.fog = new THREE.FogExp2( 0x9999ff, 0.00025 );
-			
-			////////////
-			// CUSTOM //
-			////////////
-			/*this.colorRed = THREE.ImageUtils.loadTexture( "images/SquareRed.png" );
-			this.colorGreen = THREE.ImageUtils.loadTexture( "images/SquareGreen.png" );
-			this.colorBlue = THREE.ImageUtils.loadTexture( "images/SquareBlue.png" );
-			var cubeGeometry = new THREE.CubeGeometry( 50, 50, 50 );
-			this.cubeMaterial = new THREE.MeshLambertMaterial( { color: 0xffffff, map: colorRed, emissive: 0x333333 } );
-			cube = new THREE.Mesh( cubeGeometry, cubeMaterial );
-			cube.position.set(0,26,0);
-			//cube.rotation.set(Math.PI / 4, 0, 0);
-			
-			scene.add(cube);*/
-			
-			/*MODELO ANDROID*/
-			/*var jsonLoader = new THREE.JSONLoader();
-			jsonLoader.load( "models/android-animations.js", addModelToScene );
-			// addModelToScene function is called back after model has loaded
+			// NIEBLA/AMBIENTE
+			//scene.fog = new THREE.FogExp2( 0xccccff, 0.00025 );
 
-
-			function addModelToScene( geometry, materials ) {
-				// for preparing animation
-				for (var i = 0; i < materials.length; i++)
-					materials[i].morphTargets = true;
-					
-				var material = new THREE.MeshFaceMaterial( materials );
-				android = new THREE.Mesh( geometry, material );
-				android.scale.set(10,10,10);
-				scene.add( android );
-			}*/
-
+			//////////////
+			// OBJETOS //
+			/////////////
+			
+			//MODELO MONSTRO
 			var loader = new THREE.JSONLoader();
 			loader.load( 'models/monster.js', function ( geometry, materials ) {
 					// adjust color a bit
@@ -212,10 +178,9 @@
 					morph.position.set( 0, -80, -500 );
 					morph.scale.set( 0.125, 0.125, 0.125 );
 					scene.add( morph );
-				} );
-	
-			/*CIELO O AMBIENTE*/
+			} );
 
+			//CIELO O AMBIENTE
 			var imagePrefix = "images/dawnmountain-";
 			var directions  = ["xpos", "xneg", "ypos", "yneg", "zpos", "zneg"];
 			var imageSuffix = ".png";
@@ -230,14 +195,14 @@
 			var skyMaterial = new THREE.MeshFaceMaterial( materialArray );
 			var skyBox = new THREE.Mesh( skyGeometry, skyMaterial );
 			scene.add( skyBox );
+
+			//CONFIGURAR VIDEO
 			
-			// VIDEO SET UP
-			
-			// these changes are permanent
+			//cccambios permanentes
 			videoContext.translate(320, 0);
 			videoContext.scale(-1, 1);
 				
-			// background color if no video present
+			//color de fondo
 			videoContext.fillStyle = '#005337';
 			videoContext.fillRect( 0, 0, videoCanvas.width, videoCanvas.height );				
 
@@ -245,38 +210,35 @@
 			
 			var button1 = new Image();
 			button1.src ="images/arriba.png";
-			var buttonData1 = { name:"red", image:button1, x:320 - 128 - 40, y:10, w:32, h:32 };
+			var buttonData1 = { name:"arriba", image:button1, x:320 - 128 - 40, y:10, w:32, h:32 };
 			buttons.push( buttonData1 );
 			
 			var button2 = new Image();
 			button2.src ="images/abajo.png";
-			var buttonData2 = { name:"green", image:button2, x:320 - 96 - 30, y:10, w:32, h:32 };
+			var buttonData2 = { name:"abajo", image:button2, x:320 - 96 - 30, y:10, w:32, h:32 };
 			buttons.push( buttonData2 );
 			
 			var button3 = new Image();
 			button3.src ="images/derecha.png";
-			var buttonData3 = { name:"blue", image:button3, x:320 - 64 - 20, y:10, w:32, h:32 };
+			var buttonData3 = { name:"derecha", image:button3, x:320 - 64 - 20, y:10, w:32, h:32 };
 			buttons.push( buttonData3 );
 
 			var button4 = new Image();
 			button4.src ="images/izquierda.png";
-			var buttonData4 = { name:"black", image:button4, x:320 - 32 - 10, y:10, w:32, h:32 };
+			var buttonData4 = { name:"izquierda", image:button4, x:320 - 32 - 10, y:10, w:32, h:32 };
 			buttons.push( buttonData4 );
 			
 		}
 
-		function animate() 
-		{
+		function animate(){
 		    requestAnimationFrame( animate );
 			render();		
 			update();
 		}
 
-		function update()
-		{
-			if ( keyboard.pressed("z") ) 
-			{ 
-				// do something
+		function update(){
+			if(keyboard.pressed("z")){ 
+				//alguna estupides
 			}
 			
 			controls.update();
@@ -285,64 +247,54 @@
 			checkAreas();
 		}
 
-		function render() 
-		{
+		function render(){
 			renderer.render( scene, camera );
 			var delta = clock.getDelta();
-			//cube.rotation.y += delta;
-			
-			if ( video.readyState === video.HAVE_ENOUGH_DATA ) 
-			{
-				// mirror video
+			if(video.readyState === video.HAVE_ENOUGH_DATA ){
+				//copia del video
 				videoContext.drawImage( video, 0, 0, videoCanvas.width, videoCanvas.height );
 				for ( var i = 0; i < buttons.length; i++ )
 					layer2Context.drawImage( buttons[i].image, buttons[i].x, buttons[i].y, buttons[i].w, buttons[i].h );		
 			}
 
-			if ( morph && walking ) // exists / is loaded 
-			{
-				// Alternate morph targets
+			if ( morph && walking ){// existe / es cargado
+				// Ejecucion de la animacion
 				time = new Date().getTime() % duration;
 				keyframe = Math.floor( time / interpolation ) + animOffset;
-				if ( keyframe != currentKeyframe ) 
-				{
+				if(keyframe != currentKeyframe){
 					morph.morphTargetInfluences[ lastKeyframe ] = 0;
 					morph.morphTargetInfluences[ currentKeyframe ] = 1;
 					morph.morphTargetInfluences[ keyframe ] = 0;
 					lastKeyframe = currentKeyframe;
 					currentKeyframe = keyframe;
 				}	
-				morph.morphTargetInfluences[ keyframe ] = 
-					( time % interpolation ) / interpolation;
-				morph.morphTargetInfluences[ lastKeyframe ] = 
-					1 - morph.morphTargetInfluences[ keyframe ];
-			}
-			
+				morph.morphTargetInfluences[ keyframe ] = (time % interpolation) / interpolation;
+				morph.morphTargetInfluences[ lastKeyframe ] = 1 - morph.morphTargetInfluences[ keyframe ];
+			}	
 		}
 
 		function blend() 
 		{
 			var width  = videoCanvas.width;
 			var height = videoCanvas.height;
-			// get current webcam image data
+			//obtiene los datos de la imagen actual
 			var sourceData = videoContext.getImageData(0, 0, width, height);
-			// create an image if the previous image doesn�t exist
+			//crea una imagen si la previa no existe
 			if (!lastImageData) lastImageData = videoContext.getImageData(0, 0, width, height);
-			// create a ImageData instance to receive the blended result
+			//crea una instancia de ImageDAta y recibe el resultado mesclado
 			var blendedData = videoContext.createImageData(width, height);
-			// blend the 2 images
+			// mescla las dos imagenes
 			differenceAccuracy(blendedData.data, sourceData.data, lastImageData.data);
-			// draw the result in a canvas
+			// mezcla el resultado en el canvas
 			blendContext.putImageData(blendedData, 0, 0);
-			// store the current webcam image
+			//guarda la imagen actual de la web cam
 			lastImageData = sourceData;
 		}
-		function differenceAccuracy(target, data1, data2) 
-		{
+
+		function differenceAccuracy(target, data1, data2) {
 			if (data1.length != data2.length) return null;
 			var i = 0;
-			while (i < (data1.length * 0.25)) 
-			{
+			while(i < (data1.length * 0.25)){
 				var average1 = (data1[4*i] + data1[4*i+1] + data1[4*i+2]) / 3;
 				var average2 = (data2[4*i] + data2[4*i+1] + data2[4*i+2]) / 3;
 				var diff = threshold(fastAbs(average1 - average2));
@@ -353,57 +305,57 @@
 				++i;
 			}
 		}
-		function fastAbs(value) 
-		{
+
+		function fastAbs(value){
 			return (value ^ (value >> 31)) - (value >> 31);
 		}
-		function threshold(value) 
-		{
+
+		function threshold(value){
 			return (value > 0x15) ? 0xFF : 0;
 		}
 
-		// check if white region from blend overlaps area of interest (e.g. triggers)
-		function checkAreas() 
-		{
+		//rebisa los cuerpos sobre puestos en la region de nteres (los disaradores)
+		function checkAreas() {
 			delta = clock.getDelta(); 
 			var moveDistance = 1000 * delta;
-				walking = false;
-			for (var b = 0; b < buttons.length; b++)
-			{
-				// get the pixels in a note area from the blended image
+			walking = false;
+			for (var b = 0; b < buttons.length; b++){
+				//obtiene los pixeles en un area indicada de la imagen mezclada
 				var blendedData = blendContext.getImageData( buttons[b].x, buttons[b].y, buttons[b].w, buttons[b].h );
-					
-				// calculate the average lightness of the blended data
+				
+				//calcula el promedio de luminocidad de los datoz de la mezcla
 				var i = 0;
 				var sum = 0;
 				var countPixels = blendedData.data.length * 0.25;
-				while (i < countPixels) 
-				{
+
+				while(i < countPixels){
 					sum += (blendedData.data[i*4] + blendedData.data[i*4+1] + blendedData.data[i*4+2]);
 					++i;
 				}
-				// calculate an average between of the color values of the note area [0-255]
+
+				//calcula un promedio entre los valores de color del area indicada[0-255]
 				var average = Math.round(sum / (1 * countPixels));
-				if (average > 50) // more than 20% movement detected
-				{
+				if (average > 50){//mas del 50% detectado
 					console.log( "Button " + buttons[b].name + " triggered." ); // do stuff
-					if (buttons[b].name == "red"){morph.translateX( -moveDistance ); walking=true;}
-						//cube.position.x += 4;
-						//cubeMaterial.map = colorRed;
-					if (buttons[b].name == "green"){morph.translateX(  moveDistance ); walking=true;}
-						//cube.position.x -= 4;
-						//cubeMaterial.map = colorGreen;
-					if (buttons[b].name == "blue"){morph.rotation.y += delta * 10; walking=true;}
-						//cube.position.z -= 4;
-						//cubeMaterial.map = colorBlue;
-					if (buttons[b].name == "black"){morph.rotation.y -= delta * 10; walking=true;}
-						//cube.position.z += 4;
-					// messageArea.innerHTML = "Button " + buttons[b].name + " triggered.";
+					if(buttons[b].name == "arriba"){
+						morph.translateX( -moveDistance ); 
+						walking=true;
+					}
+					if(buttons[b].name == "abajo"){
+						morph.translateX(  moveDistance ); 
+						walking=true;
+					}
+					if (buttons[b].name == "derecha"){
+						morph.rotation.y += delta * 10; 
+						walking=true;
+					}
+					if(buttons[b].name == "izquierda"){
+						morph.rotation.y -= delta * 10; 
+						walking=true;
+					}
 				}
-				// console.log("Button " + b + " average " + average);
 			}
 		}
-
 	</script>
 </body>
 </html>
